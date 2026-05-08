@@ -17,9 +17,10 @@ BGR frame, converted to QImage, and shown through Qt's regular raster widgets.
 
 import argparse
 import sys
+import time
 
 import numpy as np
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QObject, QThread, Qt, Signal, Slot
 from PySide6.QtGui import QImage, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QSizePolicy
 
@@ -56,11 +57,19 @@ def parse_args():
         default=None,
         help="Maximum stream duration in microseconds. Omit to read until the file ends or the viewer is closed.",
     )
+    parser.add_argument(
+        "--display-fps",
+        type=float,
+        default=30.0,
+        help="Maximum display refresh rate. Incoming slices above this rate are dropped to keep latency low.",
+    )
     args = parser.parse_args()
     if args.delta_t <= 0:
         parser.error("--delta-t must be a positive integer")
     if args.max_duration is not None and args.max_duration <= 0:
         parser.error("--max-duration must be a positive integer when provided")
+    if args.display_fps <= 0:
+        parser.error("--display-fps must be a positive number")
     return args
 
 
@@ -83,6 +92,61 @@ def bgr_frame_to_qimage(frame):
     return QImage(contiguous.data, width, height, bytes_per_line, image_format).copy()
 
 
+class EventReaderWorker(QObject):
+    frame_ready = Signal(QImage)
+    error = Signal(str)
+    finished = Signal()
+
+    def __init__(self, iterator, height, width, display_fps):
+        super().__init__()
+        self.iterator = iterator
+        self.frame = np.empty((height, width, 3), dtype=np.uint8)
+        self.display_period_s = 1.0 / display_fps
+        self.paused = False
+        self.running = True
+
+    @Slot()
+    def run(self):
+        events_iterator = iter(self.iterator)
+        next_display_time = 0.0
+
+        try:
+            while self.running:
+                if self.paused:
+                    QThread.msleep(5)
+                    next_display_time = time.monotonic()
+                    continue
+
+                try:
+                    events = next(events_iterator)
+                except StopIteration:
+                    break
+
+                now = time.monotonic()
+                if now < next_display_time:
+                    continue
+
+                BaseFrameGenerationAlgorithm.generate_frame(events, self.frame)
+                self.frame_ready.emit(bgr_frame_to_qimage(self.frame))
+                next_display_time = now + self.display_period_s
+        except Exception as exc:
+            self.error.emit(str(exc))
+        finally:
+            self.finished.emit()
+
+    @Slot(bool)
+    def set_paused(self, paused):
+        self.paused = paused
+
+    @Slot()
+    def stop(self):
+        self.running = False
+        reader = getattr(self.iterator, "reader", None)
+        stream = getattr(reader, "i_events_stream", None)
+        if stream is not None:
+            stream.stop()
+
+
 class EventViewer(QMainWindow):
     def __init__(self, args):
         super().__init__()
@@ -99,18 +163,13 @@ class EventViewer(QMainWindow):
         if width is None or height is None:
             raise RuntimeError("Could not determine sensor geometry from the event stream")
 
-        self.events = iter(self.iterator)
-        self.frame = np.empty((height, width, 3), dtype=np.uint8)
         self.paused = False
+        self.last_image = None
 
         self.image_label = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
         self.image_label.setMinimumSize(width, height)
         self.image_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setCentralWidget(self.image_label)
-
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.next_frame)
-        self.timer.start(max(1, args.delta_t // 1000))
 
         self.shortcuts = [
             QShortcut(QKeySequence(Qt.Key.Key_Space), self, activated=self.toggle_pause),
@@ -119,21 +178,27 @@ class EventViewer(QMainWindow):
             QShortcut(QKeySequence(Qt.Key.Key_Escape), self, activated=self.close),
         ]
 
+        self.worker_thread = QThread(self)
+        self.worker = EventReaderWorker(self.iterator, height, width, args.display_fps)
+        self.worker.moveToThread(self.worker_thread)
+        self.worker_thread.started.connect(self.worker.run)
+        self.worker.frame_ready.connect(self.update_frame)
+        self.worker.error.connect(self.report_worker_error)
+        self.worker.finished.connect(self.worker_thread.quit)
+        self.worker.finished.connect(self.on_worker_finished)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker_thread.finished.connect(self.on_worker_thread_finished)
+        self.worker_thread.finished.connect(self.worker_thread.deleteLater)
+        self.worker_thread.start()
+
     def toggle_pause(self):
         self.paused = not self.paused
+        if self.worker is not None:
+            self.worker.set_paused(self.paused)
 
-    def next_frame(self):
-        if self.paused:
-            return
-
-        try:
-            events = next(self.events)
-        except StopIteration:
-            self.timer.stop()
-            return
-
-        BaseFrameGenerationAlgorithm.generate_frame(events, self.frame)
-        image = bgr_frame_to_qimage(self.frame)
+    @Slot(QImage)
+    def update_frame(self, image):
+        self.last_image = image
         pixmap = QPixmap.fromImage(image)
         if self.image_label.size() != pixmap.size():
             pixmap = pixmap.scaled(
@@ -143,17 +208,35 @@ class EventViewer(QMainWindow):
             )
         self.image_label.setPixmap(pixmap)
 
+    @Slot(str)
+    def report_worker_error(self, message):
+        print(f"Event reader stopped: {message}", file=sys.stderr)
+
+    @Slot()
+    def on_worker_finished(self):
+        self.worker = None
+
+    @Slot()
+    def on_worker_thread_finished(self):
+        self.worker_thread = None
+
     def resizeEvent(self, event):
-        pixmap = self.image_label.pixmap()
-        if pixmap is not None:
-            self.image_label.setPixmap(
-                pixmap.scaled(
-                    self.image_label.size(),
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.FastTransformation,
-                )
+        if self.last_image is not None:
+            pixmap = QPixmap.fromImage(self.last_image).scaled(
+                self.image_label.size(),
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.FastTransformation,
             )
+            self.image_label.setPixmap(pixmap)
         super().resizeEvent(event)
+
+    def closeEvent(self, event):
+        if self.worker is not None:
+            self.worker.stop()
+        if self.worker_thread is not None:
+            self.worker_thread.quit()
+            self.worker_thread.wait(1000)
+        super().closeEvent(event)
 
 
 def main():
