@@ -20,6 +20,7 @@ from metavision_core_ml.event_to_video.lightning_model import EventToVideoLightn
 from metavision_core_ml.event_to_video.lightning_model import EventToVideoCallback
 from metavision_core_ml.event_to_video.data_module import EventToVideoDataModule
 from metavision_core_ml.utils.train_utils import search_latest_checkpoint
+from metavision_core_ml.utils.torch_ops import infer_device
 
 
 import os
@@ -49,6 +50,7 @@ def train_parser():
     parser.add_argument('--save_every', type=int, default=1, help='save every X epochs')
     parser.add_argument('--just_test', action='store_true', help='launches demo video')
     parser.add_argument('--cpu', action='store_true', help='use cpu')
+    parser.add_argument('--device', type=str, default='', help='training device, e.g. cuda, mps or cpu')
     parser.add_argument('--resume', action='store_true', help='resume from latest checkpoint')
     parser.add_argument('--checkpoint', type=str, default='', help='resume from specific checkpoint')
     parser.add_argument('--mask_loss_no_events_yet', action='store_true', help='mask loss where no events')
@@ -92,9 +94,17 @@ def train_parser():
 def train(params: argparse.Namespace):
     print(params)
 
+    train_device = infer_device(params.cpu, params.device or None)
+    if train_device.type == "cpu":
+        params.cpu = True
+    if params.data_device == "cuda" and train_device.type == "mps":
+        params.data_device = "mps"
+    if train_device.type == "mps" and params.precision == 16:
+        print("Warning: MPS training uses precision=32 instead of precision=16.")
+        params.precision = 32
+
     model = EventToVideoLightningModel(params)
-    if not params.cpu:
-        model.cuda()
+    model.to(train_device)
 
     if params.resume:
         ckpt = search_latest_checkpoint(params.root_dir)
@@ -110,15 +120,14 @@ def train(params: argparse.Namespace):
     logger = TensorBoardLogger(save_dir=os.path.join(params.root_dir, 'logs'))
 
     if ckpt is not None and params.just_test:
-        checkpoint = torch.load(ckpt, map_location=torch.device('cpu') if params.cpu else torch.device("cuda"))
+        checkpoint = torch.load(ckpt, map_location=train_device)
         model.load_state_dict(checkpoint['state_dict'])
 
     # Data Setup
     data = EventToVideoDataModule(params)
 
     if params.just_test:
-        if not params.cpu:
-            model = model.cuda()
+        model = model.to(train_device)
         model.demo_video(data.val_dataloader(), -1)
     else:
         demo_callback = EventToVideoCallback(data, params.demo_every, show_window=not params.no_window)
@@ -132,7 +141,7 @@ def train(params: argparse.Namespace):
             log_every_n_steps=5,
             limit_train_batches=params.limit_train_batches,
             limit_val_batches=params.limit_val_batches,
-            accelerator="cpu" if params.cpu else "auto"
+            accelerator=train_device.type
         )
         trainer.fit(model, data, ckpt_path=ckpt)
 

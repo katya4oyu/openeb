@@ -26,6 +26,44 @@ def cuda_tick():
     return time.time()
 
 
+def synchronize_device(device=None):
+    device = torch.device(device) if device is not None else None
+    if device is not None and device.type == "mps":
+        torch.mps.synchronize()
+    elif device is None or device.type == "cuda":
+        torch.cuda.synchronize()
+
+
+def device_tick(device=None):
+    """
+    Measures time for torch operations on CUDA or MPS devices.
+    """
+    synchronize_device(device)
+    return time.time()
+
+
+def infer_device(use_cpu=False, requested_device=None):
+    """
+    Returns a usable torch device, preferring an explicit request, then CUDA, MPS, and CPU.
+    """
+    if use_cpu:
+        return torch.device("cpu")
+
+    if requested_device:
+        device = torch.device(requested_device)
+        if device.type == "cuda" and not torch.cuda.is_available():
+            raise RuntimeError("CUDA was requested but is not available")
+        if device.type == "mps" and not torch.backends.mps.is_available():
+            raise RuntimeError("MPS was requested but is not available")
+        return device
+
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
 def cuda_time(func):
     """
     Decorator for Pytorch ops

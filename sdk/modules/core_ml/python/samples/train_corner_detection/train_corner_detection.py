@@ -22,6 +22,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 import pytorch_lightning as pl
 
 from metavision_core_ml.utils.train_utils import search_latest_checkpoint
+from metavision_core_ml.utils.torch_ops import infer_device
 from metavision_core_ml.corner_detection.data_module import EventToCornerDataModule
 from metavision_core_ml.corner_detection.lightning_model import CornerDetectionCallback, CornerDetectionLightningModel
 
@@ -56,6 +57,7 @@ def main(raw_args=None):
     parser.add_argument('--save_every', type=int, default=1, help='save every X epochs')
     parser.add_argument('--just_test', action='store_true', help='launches demo video')
     parser.add_argument('--cpu', action='store_true', help='use cpu')
+    parser.add_argument('--device', type=str, default='', help='training device, e.g. cuda, mps or cpu')
     parser.add_argument('--resume', action='store_true', help='resume from latest checkpoint')
     parser.add_argument('--checkpoint', type=str, default='', help='resume from specific checkpoint')
     parser.add_argument('--mask_loss_no_events_yet', action='store_true', help='mask loss where no events')
@@ -86,11 +88,18 @@ def main(raw_args=None):
 
     print(params)
 
-    model = CornerDetectionLightningModel(params)
-    if not params.cpu:
-        model.cuda()
-    else:
+    train_device = infer_device(params.cpu, params.device or None)
+    if train_device.type == "cpu":
+        params.cpu = True
         params.data_device = "cpu"
+    elif params.data_device == "cuda:0" and train_device.type == "mps":
+        params.data_device = "mps"
+    if train_device.type == "mps" and params.precision == 16:
+        print("Warning: MPS training uses precision=32 instead of precision=16.")
+        params.precision = 32
+
+    model = CornerDetectionLightningModel(params)
+    model.to(train_device)
 
     if params.resume:
         ckpt = search_latest_checkpoint(params.root_dir)
@@ -106,15 +115,14 @@ def main(raw_args=None):
     logger = TensorBoardLogger(save_dir=os.path.join(params.root_dir, 'logs'))
 
     if ckpt is not None and params.just_test:
-        checkpoint = torch.load(ckpt, map_location=torch.device('cpu') if params.cpu else torch.device("cuda"))
+        checkpoint = torch.load(ckpt, map_location=train_device)
         model.load_state_dict(checkpoint['state_dict'])
 
     # Data Setup
     data = EventToCornerDataModule(params)
 
     if params.just_test:
-        if not params.cpu:
-            model = model.cuda()
+        model = model.to(train_device)
         model.video(data.val_dataloader(), -1)
     else:
         demo_callback = CornerDetectionCallback(data, params.demo_every)
@@ -122,7 +130,7 @@ def main(raw_args=None):
             default_root_dir=params.root_dir,
             callbacks=[checkpoint_callback, demo_callback],
             logger=logger,
-            accelerator="cpu" if params.cpu else "auto",
+            accelerator=train_device.type,
             precision=params.precision,
             accumulate_grad_batches=params.accumulate_grad_batches,
             max_epochs=params.epochs,

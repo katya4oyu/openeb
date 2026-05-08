@@ -31,31 +31,37 @@
         "dev"
       ]
     },
-    "ninja": "latest",
-    "opencv": "4.12.0",
-    "pkg-config": "latest",
-    "protobuf": "latest",
-    "python312": "latest",
-    "python312Packages.h5py": "latest",
-    "python312Packages.numpy": "latest",
-    "python312Packages.opencv4": "4.12.0",
-    "python312Packages.pandas": "latest",
+    "ninja":                      "latest",
+    "opencv":                     "4.12.0",
+    "pkg-config":                 "latest",
+    "protobuf":                   "latest",
+    "python312":                  "latest",
+    "python312Packages.h5py":     "latest",
+    "python312Packages.numpy":    "latest",
+    "python312Packages.opencv4":  "4.12.0",
+    "python312Packages.pandas":   "latest",
     "python312Packages.pybind11": "latest",
-    "python312Packages.pyside6": "latest",
+    "python312Packages.pyside6":  "latest",
     "zlib": {
       "version": "latest",
       "outputs": [
         "out",
         "dev"
       ]
-    }
+    },
+    "python312Packages.torch":             "2.9.1",
+    "python312Packages.torchvision":       "0.24.1",
+    "python312Packages.pytorch-lightning": "2.6.0",
+    "python312Packages.kornia":            "0.8.2",
+    "python312Packages.numba":             "latest",
+    "python312Packages.scikit-image":      "latest"
   },
   "env": {
     "PYTHONNOUSERSITE": "1"
   },
   "shell": {
     "init_hook": [
-      "export PYTHONPATH=\"$PWD/build/py3:$PWD/sdk/modules/core/python/pypkg:$PWD/utils/python:$PWD/utils/ci${PYTHONPATH:+:$PYTHONPATH}\"",
+      "export PYTHONPATH=\"$PWD/build/py3:$PWD/sdk/modules/core/python/pypkg:$PWD/sdk/modules/core_ml/python/pypkg:$PWD/utils/python:$PWD/utils/ci${PYTHONPATH:+:$PYTHONPATH}\"",
       "export MV_HAL_PLUGIN_PATH=\"$PWD/build/lib/metavision/hal/plugins${MV_HAL_PLUGIN_PATH:+:$MV_HAL_PLUGIN_PATH}\"",
       "export HDF5_PLUGIN_PATH=\"$PWD/build/lib/hdf5/plugin${HDF5_PLUGIN_PATH:+:$HDF5_PLUGIN_PATH}\"",
       "export DYLD_LIBRARY_PATH=\"$PWD/build/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}\"",
@@ -65,13 +71,17 @@
       "echo 'Check Python bindings after build: devbox run import-check'"
     ],
     "scripts": {
-      "configure": "cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_SAMPLES=ON -DCOMPILE_PYTHON3_BINDINGS=ON -DGENERATE_DOC=OFF -DGENERATE_DOC_PYTHON_BINDINGS=OFF -DMETAVISION_SELECTED_MODULES='base;core;stream;ui' -DLFS_DOWNLOAD_COMPILATION_RESOURCES=OFF -DLFS_DOWNLOAD_VALIDATION_RESOURCES=OFF -DHDF5_ECF_PLUGIN_INSTALL_PATH=lib/hdf5/plugin -DPython3_EXECUTABLE=$(command -v python) -DPYTHON3_SITE_PACKAGES=$PWD/build/python-site-packages",
-      "build": "cmake --build build",
+      "configure":    "cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_SAMPLES=ON -DCOMPILE_PYTHON3_BINDINGS=ON -DGENERATE_DOC=OFF -DGENERATE_DOC_PYTHON_BINDINGS=OFF -DMETAVISION_SELECTED_MODULES='base;core;stream;ui' -DLFS_DOWNLOAD_COMPILATION_RESOURCES=OFF -DLFS_DOWNLOAD_VALIDATION_RESOURCES=OFF -DHDF5_ECF_PLUGIN_INSTALL_PATH=lib/hdf5/plugin -DPython3_EXECUTABLE=$(command -v python) -DPYTHON3_SITE_PACKAGES=$PWD/build/python-site-packages",
+      "build":        "cmake --build build",
       "import-check": "python -c 'import metavision_sdk_base, metavision_sdk_core, metavision_sdk_stream, metavision_sdk_ui, metavision_hal'",
-      "camera-list": "build/bin/metavision_hal_ls",
+      "camera-list":  "build/bin/metavision_hal_ls",
       "camera-trace": "MV_LOG_LEVEL=TRACE build/bin/metavision_hal_ls",
-      "usb-list": "system_profiler SPUSBDataType | grep -A 25 -B 8 -E 'SilkyEvCam|CenturyArks|Vendor ID: 0x31f7|Product ID: 0x0002' || true",
-      "clean": "cmake --build build --target clean"
+      "time-surface": "python sdk/modules/core/python/samples/metavision_time_surface/metavision_time_surface.py \"$@\"",
+      "dummy-radar":  "python sdk/modules/core/python/samples/metavision_dummy_radar/metavision_dummy_radar.py \"$@\"",
+      "flow-infer":   "python sdk/modules/core_ml/python/samples/metavision_flow_inference/metavision_flow_inference.py \"$@\"",
+      "spatter-lite": "python sdk/modules/core/python/samples/metavision_spatter_tracking_lite/metavision_spatter_tracking_lite.py \"$@\"",
+      "usb-list":     "system_profiler SPUSBDataType | grep -A 25 -B 8 -E 'SilkyEvCam|CenturyArks|Vendor ID: 0x31f7|Product ID: 0x0002' || true",
+      "clean":        "cmake --build build --target clean"
     }
   }
 }

@@ -22,7 +22,7 @@ from metavision_core_ml.utils.torch_ops import normalize_tiles
 from metavision_core_ml.video_to_event.video_stream_dataset import make_video_dataset
 from metavision_core_ml.video_to_event.gpu_simulator import GPUEventSimulator
 from metavision_core_ml.preprocessing.event_to_tensor_torch import event_image
-from metavision_core_ml.utils.torch_ops import cuda_tick
+from metavision_core_ml.utils.torch_ops import device_tick, infer_device
 from profilehooks import profile
 
 
@@ -44,7 +44,7 @@ def parse_args(only_default_values=False):
                                                                              "the event tensor")
     parser.add_argument('--num-workers', default=2, type=int, help="dataset number of workers")
 
-    parser.add_argument('--device', default='cuda:0', type=str, help="compute device")
+    parser.add_argument('--device', default='', type=str, help="compute device")
     parser.add_argument('--mode', default='event_volume', type=str, help="format returned")
     parser.add_argument("--cutoff-hz", default=0, type=float,
                         help="cutoff frequency for photodiode latency simulation")
@@ -84,6 +84,7 @@ def test_gpu_simulator(path,
     Fixed Number of Frames/ Video
     """
     print('parameters:', locals())
+    device = infer_device(requested_device=device or None)
     nrows = 2 ** ((batch_size.bit_length() - 1) // 2)
     dl = make_video_dataset(
         path, num_workers, batch_size, height, width, max_frames_per_video - 1, max_frames_per_video,
@@ -109,7 +110,7 @@ def test_gpu_simulator(path,
         if pause and last_images is not None:
             images = last_images
 
-        start = cuda_tick()
+        start = device_tick(device)
 
         # randomize parameters
         # event_gpu.randomize_broken_pixels(first_times, video_proba=0.1)
@@ -135,7 +136,7 @@ def test_gpu_simulator(path,
             events = event_gpu.get_events(log_images, num_frames, timestamps, first_times)
             counts = event_image(events, batch_size, height, width)
 
-        end = cuda_tick()
+        end = device_tick(device)
         print('total runtime: ', end - start)
 
         im = 255 * normalize_tiles(counts.unsqueeze(1).float(), num_stds=3)

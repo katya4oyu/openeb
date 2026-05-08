@@ -806,6 +806,120 @@
         }
       }
     },
+    "python312Packages.kornia@0.8.2": {
+      "last_modified": "2025-11-23T21:50:36Z",
+      "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#python312Packages.kornia",
+      "source": "devbox-search",
+      "version": "0.8.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dxf3mav2gv9q5hg7cajfzyc72zy574wl-python3.12-kornia-0.8.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/p8qimcx78gga1fxq7r6lxpyd78yx1xwh-python3.12-kornia-0.8.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/dxf3mav2gv9q5hg7cajfzyc72zy574wl-python3.12-kornia-0.8.2"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/g1m0w9nvsvjhlrw7pn2j5bfz3g62yd2k-python3.12-kornia-0.8.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/6x0m3yr8idrcpqr09ihip36xfc8xy0x4-python3.12-kornia-0.8.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/g1m0w9nvsvjhlrw7pn2j5bfz3g62yd2k-python3.12-kornia-0.8.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/29h696048m18manl6ifij86gh8yc87mj-python3.12-kornia-0.8.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/gkz5kygwjsdvk4cncv406gy1g773pfr0-python3.12-kornia-0.8.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/29h696048m18manl6ifij86gh8yc87mj-python3.12-kornia-0.8.2"
+        }
+      }
+    },
+    "python312Packages.numba@latest": {
+      "last_modified": "2025-11-23T21:50:36Z",
+      "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#python312Packages.numba",
+      "source": "devbox-search",
+      "version": "0.62.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/s3q5qz5z19c9g75n8qcvm9w9dlvp3gam-python3.12-numba-0.62.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/mr43p1wvjyiskw4dxkcydxng2aicpnin-python3.12-numba-0.62.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/s3q5qz5z19c9g75n8qcvm9w9dlvp3gam-python3.12-numba-0.62.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8qwiz423crz22x73phrrwkdxlmbl61hx-python3.12-numba-0.62.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/prm2mnqmxg55nz4rxhy4512rlc26lp7a-python3.12-numba-0.62.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/8qwiz423crz22x73phrrwkdxlmbl61hx-python3.12-numba-0.62.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/fzir1rfpjrbxqlqs4iq2bhbwj2xhyq4s-python3.12-numba-0.62.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/7k1vqmaw6salggy1knmn1zb4rvxdj6lf-python3.12-numba-0.62.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/fzir1rfpjrbxqlqs4iq2bhbwj2xhyq4s-python3.12-numba-0.62.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/k8102s27ra09fpn7dqdqlm4m4j0d3wm8-python3.12-numba-0.62.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/g2g2g1mhvlb0gl5kv7xjhizc0dqq945v-python3.12-numba-0.62.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/k8102s27ra09fpn7dqdqlm4m4j0d3wm8-python3.12-numba-0.62.0"
+        }
+      }
+    },
     "python312Packages.numpy@latest": {
       "last_modified": "2025-11-23T21:50:36Z",
       "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#python312Packages.numpy",
@@ -1139,6 +1253,310 @@
             }
           ],
           "store_path": "/nix/store/gyslisb47dh5382azy1zcpcj4y7cjn1r-pyside6-6.10.0"
+        }
+      }
+    },
+    "python312Packages.pytorch-lightning@2.6.0": {
+      "last_modified": "2025-12-27T21:13:36Z",
+      "resolved": "github:NixOS/nixpkgs/5c2bc52fb9f8c264ed6c93bd20afa2ff5e763dce#python312Packages.pytorch-lightning",
+      "source": "devbox-search",
+      "version": "2.6.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/phr710ishxnm71fadnydicbs1nmqzl1r-python3.12-pytorch-lightning-2.6.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/jmy8i6mf33hf32v0gh2dk671rhy3ccxf-python3.12-pytorch-lightning-2.6.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/phr710ishxnm71fadnydicbs1nmqzl1r-python3.12-pytorch-lightning-2.6.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/d77b6mcxkrjzb6wmzf2kcsbmf0kmjnyz-python3.12-pytorch-lightning-2.6.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/dnlx0n681ir6n689s4xcy2w7kn81a6zl-python3.12-pytorch-lightning-2.6.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/d77b6mcxkrjzb6wmzf2kcsbmf0kmjnyz-python3.12-pytorch-lightning-2.6.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/r4v32d6bk2wcr4c12ajrwqn4w6yrqk8l-python3.12-pytorch-lightning-2.6.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/ig6jlz7kql4p0fwbvpwvnbc1zlf2zw3d-python3.12-pytorch-lightning-2.6.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/r4v32d6bk2wcr4c12ajrwqn4w6yrqk8l-python3.12-pytorch-lightning-2.6.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/x1xsfwnwsca9y6wqnjgb8zwkz9ly5w5v-python3.12-pytorch-lightning-2.6.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/d1jsqxg0iqxdjv202g6pb537qs21p1hj-python3.12-pytorch-lightning-2.6.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/x1xsfwnwsca9y6wqnjgb8zwkz9ly5w5v-python3.12-pytorch-lightning-2.6.0"
+        }
+      }
+    },
+    "python312Packages.scikit-image@latest": {
+      "last_modified": "2025-12-15T04:22:15Z",
+      "resolved": "github:NixOS/nixpkgs/09b8fda8959d761445f12b55f380d90375a1d6bb#python312Packages.scikit-image",
+      "source": "devbox-search",
+      "version": "0.25.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/lwx47nlk9rl980m6rs9gh7yv7fbhhjiz-python3.12-scikit-image-0.25.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/jsbbwy03wgwjkdbyd5sx0zq4zx79f0s6-python3.12-scikit-image-0.25.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/lwx47nlk9rl980m6rs9gh7yv7fbhhjiz-python3.12-scikit-image-0.25.2"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/33i51hja2hzwyq7vr38i6k8vqwxc86za-python3.12-scikit-image-0.25.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/spjjn6vcfz9ycphxfnf085mahdfxrdjc-python3.12-scikit-image-0.25.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/33i51hja2hzwyq7vr38i6k8vqwxc86za-python3.12-scikit-image-0.25.2"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2kn821id9bbfvqsicljrav57mp97r9ff-python3.12-scikit-image-0.25.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/krq342m1vv0d1n4lp62pfdcsihgdm75h-python3.12-scikit-image-0.25.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/2kn821id9bbfvqsicljrav57mp97r9ff-python3.12-scikit-image-0.25.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2y223ihnjfj3yh9pm90iixc8mx3bxxng-python3.12-scikit-image-0.25.2",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/4alzv6mb4wk8521pmrjd72a670k6ipfn-python3.12-scikit-image-0.25.2-dist"
+            }
+          ],
+          "store_path": "/nix/store/2y223ihnjfj3yh9pm90iixc8mx3bxxng-python3.12-scikit-image-0.25.2"
+        }
+      }
+    },
+    "python312Packages.torch@2.9.1": {
+      "last_modified": "2025-12-29T16:45:58Z",
+      "resolved": "github:NixOS/nixpkgs/346dd96ad74dc4457a9db9de4f4f57dab2e5731d#python312Packages.torch",
+      "source": "devbox-search",
+      "version": "2.9.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/d12was1p1yc0hjkp0jjrjnj7bva8rmbw-python3.12-torch-2.9.1",
+              "default": true
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/p5yrqqhfxpwsbcq2r2aw9ka65csnzchs-python3.12-torch-2.9.1-lib"
+            },
+            {
+              "name": "cxxdev",
+              "path": "/nix/store/qyrq23xaxn4xg35d6548zl79fw0s9gav-python3.12-torch-2.9.1-cxxdev"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/2hah6hcia4m2siwss5p6p7p7idrb1wa6-python3.12-torch-2.9.1-dev"
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/fwfrwc9f8mcpql0y3x6ap1afblj4yb3x-python3.12-torch-2.9.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/d12was1p1yc0hjkp0jjrjnj7bva8rmbw-python3.12-torch-2.9.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/yfygk4331mglcc6xj602xgr8325n9hxp-python3.12-torch-2.9.1",
+              "default": true
+            },
+            {
+              "name": "cxxdev",
+              "path": "/nix/store/my0ln7gilp09b7390pv7cgkld7s97qs6-python3.12-torch-2.9.1-cxxdev"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/l7s7wzdqk3qbqqk7gyiyivqjm0jkil1w-python3.12-torch-2.9.1-dev"
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/in97h5blh8nh7cnrgcc215rwwm3fdv2k-python3.12-torch-2.9.1-dist"
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/fzk78gvabkdrvpi3h4anya34y24sl7kq-python3.12-torch-2.9.1-lib"
+            }
+          ],
+          "store_path": "/nix/store/yfygk4331mglcc6xj602xgr8325n9hxp-python3.12-torch-2.9.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xd1k7wriglan0gz5hplwakndlbm51lai-python3.12-torch-2.9.1",
+              "default": true
+            },
+            {
+              "name": "cxxdev",
+              "path": "/nix/store/30apz22ap3k2k4bki8bqsl0hgx5b8fbp-python3.12-torch-2.9.1-cxxdev"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/xjf1dvm1l7apqnkjnx9wdlp50lgp8j0h-python3.12-torch-2.9.1-dev"
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/dkjxycalfbcc6sm02mxrvpdnwhb7gybw-python3.12-torch-2.9.1-dist"
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/imqiqsyllj2zpscs3fqyxgwj19igl5qg-python3.12-torch-2.9.1-lib"
+            }
+          ],
+          "store_path": "/nix/store/xd1k7wriglan0gz5hplwakndlbm51lai-python3.12-torch-2.9.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ckbi4xsg4d9flm0p9x79g0zfbrg1m6m5-python3.12-torch-2.9.1",
+              "default": true
+            },
+            {
+              "name": "cxxdev",
+              "path": "/nix/store/x92k9bn8y44xlxicqh1cx6b3z8fgm21y-python3.12-torch-2.9.1-cxxdev"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/a116adbb9wmk9dvgb3bicy6f7ksy1vn6-python3.12-torch-2.9.1-dev"
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/i745pgkk0784hjxm8qnrv91m420wzvnr-python3.12-torch-2.9.1-dist"
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/xdkc5krks0qr91fliz5zxl11cflkqm88-python3.12-torch-2.9.1-lib"
+            }
+          ],
+          "store_path": "/nix/store/ckbi4xsg4d9flm0p9x79g0zfbrg1m6m5-python3.12-torch-2.9.1"
+        }
+      }
+    },
+    "python312Packages.torchvision@0.24.1": {
+      "last_modified": "2025-11-23T21:50:36Z",
+      "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#python312Packages.torchvision",
+      "source": "devbox-search",
+      "version": "0.24.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bcv3dw03f231mhibjhzk52i038nlq19w-python3.12-torchvision-0.24.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/62nyyb20bc28dsjzgnwwhdz9nymqx2rr-python3.12-torchvision-0.24.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/bcv3dw03f231mhibjhzk52i038nlq19w-python3.12-torchvision-0.24.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/97pw7lwh7dm86cqx7qjdrg4p4126sgpa-python3.12-torchvision-0.24.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/xk42mwp4hb0avjk2ji72bqbdlqgrgsjs-python3.12-torchvision-0.24.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/97pw7lwh7dm86cqx7qjdrg4p4126sgpa-python3.12-torchvision-0.24.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kcb6k97530wxsd45bqdm4p3vqqj0gfns-python3.12-torchvision-0.24.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/mh3282sr3088g4cpz5kfcib8b34s1x1y-python3.12-torchvision-0.24.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/kcb6k97530wxsd45bqdm4p3vqqj0gfns-python3.12-torchvision-0.24.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/cd88qgmwy0l2mdncm1b2bncds1lyqvaa-python3.12-torchvision-0.24.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/kig2lrw41iz5q8fnhac0fsyck0ca7b68-python3.12-torchvision-0.24.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/cd88qgmwy0l2mdncm1b2bncds1lyqvaa-python3.12-torchvision-0.24.1"
         }
       }
     },

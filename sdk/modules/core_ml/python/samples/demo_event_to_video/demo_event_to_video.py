@@ -18,7 +18,7 @@ import torch.nn.functional as F
 from metavision_sdk_base import EventCD
 from metavision_core_ml.event_to_video.lightning_model import EventToVideoLightningModel
 from metavision_core_ml.preprocessing.event_to_tensor_torch import event_cd_to_torch, event_volume
-from metavision_core_ml.utils.torch_ops import normalize_tiles, viz_flow
+from metavision_core_ml.utils.torch_ops import infer_device, normalize_tiles, viz_flow
 from metavision_core_ml.utils.show_or_write import ShowWrite
 from metavision_core.event_io.events_iterator import EventsIterator
 from metavision_core.event_io.adaptive_rate_events_iterator import AdaptiveRateEventsIterator
@@ -39,6 +39,7 @@ def parse_args(argv=None):
     parser.add_argument('--max_duration', type=int, default=-1, help='run for this duration')
     parser.add_argument('--thr_var', type=float, default=3e-5, help='threshold variance for adaptive rate')
     parser.add_argument('--cpu', action='store_true', help='if true use cpu and not cuda')
+    parser.add_argument('--device', type=str, default='', help='compute device, e.g. cuda, mps or cpu')
     parser.add_argument('--flow', action='store_true', help='if true predict also optical flow')
     parser.add_argument('--viz_input', action='store_true', help='if true viz input')
     parser.add_argument('--no_window', action='store_true', help='disable window')
@@ -64,8 +65,8 @@ def run(params):
     height, width = mv_it.get_size()
     print('original size: ', height, width)
 
-    device = 'cpu' if params.cpu else 'cuda'
-    model = EventToVideoLightningModel.load_from_checkpoint(params.checkpoint)
+    device = infer_device(params.cpu, params.device or None)
+    model = EventToVideoLightningModel.load_from_checkpoint(params.checkpoint, map_location=device)
     model.eval().to(device)
     nbins = model.hparams.event_volume_depth
     print('Nbins: ', nbins)

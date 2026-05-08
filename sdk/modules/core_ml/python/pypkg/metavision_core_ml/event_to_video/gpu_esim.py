@@ -42,10 +42,10 @@ def collect_target_images(gray_images, timestamps, video_len, target_indices):
             assert start_f <= idx < end_f
             img = gray_images[..., idx].clone()
             row_img.append(img[None, None])
-            row_ts.append(timestamps[i, tt])
+            row_ts.append(timestamps[i, tt].detach().cpu())
         row_img = torch.cat(row_img)
         target_gray.append(row_img[:, None])
-        target_times.append(torch.FloatTensor(row_ts)[None, :])
+        target_times.append(torch.stack(row_ts).float()[None, :])
     target_images = torch.cat(target_gray, 1)  # T,B,C,H,W
     target_times = torch.cat(target_times, 0)
     return target_images, target_times
@@ -118,8 +118,10 @@ class GPUEBSIM(object):
             timestamps = batch['timestamps'].to(self.device)
             video_len = batch["video_len"].to(self.device)
             target_indices = batch['target_indices']
-            prev_ts = self.simulator.prev_image_ts.clone()
-            prev_ts = prev_ts * (1 - first_times) + timestamps[:, 0] * first_times
+            prev_image_ts = self.simulator.prev_image_ts.detach().cpu()
+            first_times_cpu = first_times.detach().cpu()
+            timestamps_cpu = timestamps.detach().cpu()
+            prev_ts = prev_image_ts * (1 - first_times_cpu) + timestamps_cpu[:, 0] * first_times_cpu
 
             if self.do_randomize_noises:
                 self.randomize_noises(batch['first_times'])
@@ -129,7 +131,7 @@ class GPUEBSIM(object):
             target_images, target_times = collect_target_images(
                 gray_images, timestamps, batch['video_len'], target_indices)
 
-            all_times = torch.cat((prev_ts[:, None], target_times.to(self.device)), dim=1).long()
+            all_times = torch.cat((prev_ts[:, None], target_times), dim=1).long()
             inputs = self.simulator.event_volume_sequence(
                 log_images, video_len, timestamps, all_times, first_times, self.event_volume_depth)
 

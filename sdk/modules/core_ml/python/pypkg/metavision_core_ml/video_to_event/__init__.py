@@ -7,7 +7,13 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-from .simulator import EventSimulator
-from .simu_events_iterator import SimulatedEventsIterator
-from .video_stream_dataset import make_video_dataset
 from .gpu_simulator import GPUEventSimulator
+
+try:
+    from .simulator import EventSimulator
+    from .simu_events_iterator import SimulatedEventsIterator
+    from .video_stream_dataset import make_video_dataset
+except ModuleNotFoundError:
+    # Keep GPUEventSimulator importable in minimal ML environments where optional
+    # video streaming dependencies such as scikit-video are not installed.
+    pass

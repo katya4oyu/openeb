@@ -56,7 +56,7 @@ class GPUEventSimulator(nn.Module):
         super().__init__()
         shape1 = (batch_size, height, width)
         shape2 = (2, batch_size, height, width)
-        self.register_buffer("log_states", torch.zeros(shape1, dtype=torch.float64))
+        self.register_buffer("log_states", torch.zeros(shape1, dtype=torch.float32))
         self.register_buffer("prev_log_images", torch.zeros(shape1, dtype=torch.float32))
         self.register_buffer("counts", torch.zeros(shape1, dtype=torch.int32))
         self.register_buffer("timestamps", torch.zeros(shape1, dtype=torch.float32))
@@ -215,6 +215,19 @@ class GPUEventSimulator(nn.Module):
     def forward(self):
         raise NotImplementedError
 
+    @staticmethod
+    def _cpu_kernel_args(tensors):
+        cpu_tensors = [v.detach().cpu().contiguous() for v in tensors]
+        return cpu_tensors, [v.numpy() for v in cpu_tensors]
+
+    @staticmethod
+    def _copy_kernel_results(tensors, cpu_tensors, mutable_indices):
+        for i in mutable_indices:
+            tensor = tensors[i]
+            cpu_tensor = cpu_tensors[i]
+            if tensor.device != cpu_tensor.device or tensor.data_ptr() != cpu_tensor.data_ptr():
+                tensor.copy_(cpu_tensor.to(tensor.device))
+
     def _kernel_call(self, log_images, video_len, image_ts, first_times, cuda_kernel, cpu_kernel, args_list, *args,
                      reset_rng_states=True):
         """
@@ -253,10 +266,12 @@ class GPUEventSimulator(nn.Module):
             # kernel
             cuda_kernel[grid_dim, block_dim](*cu_args)
         else:
-            args_list = [v.numpy() for v in args_list] + list(args)
-
-            # kernel
-            cpu_kernel(*args_list)
+            cpu_tensors, np_args = self._cpu_kernel_args(args_list)
+            cpu_kernel(*(np_args + list(args)))
+            num_output_args = 1
+            state_offset = len(args_list) - 14
+            mutable_indices = list(range(num_output_args)) + [state_offset + i for i in (5, 6, 7)]
+            self._copy_kernel_results(args_list, cpu_tensors, mutable_indices)
 
     @torch.no_grad()
     def get_events(self, log_images, video_len, image_ts, first_times):
@@ -340,8 +355,11 @@ class GPUEventSimulator(nn.Module):
             split_channels: if True positive and negative events have a distinct channels instead of doing their
                 difference in a single channel.
         """
-        prev_times = self.prev_image_ts * (1 - first_times) + image_ts[:, 0] * first_times
-        end_times = image_ts[:, -1]
+        prev_image_ts = self.prev_image_ts.detach().cpu()
+        first_times_cpu = first_times.detach().cpu()
+        image_ts_cpu = image_ts.detach().cpu()
+        prev_times = prev_image_ts * (1 - first_times_cpu) + image_ts_cpu[:, 0] * first_times_cpu
+        end_times = image_ts_cpu[:, -1]
 
         target_timestamps = torch.cat((prev_times[:, None], end_times[:, None]), 1).long()
 
@@ -387,10 +405,6 @@ class GPUEventSimulator(nn.Module):
         voxel_grid = torch.zeros(
             (batch_times, batch_size, num_channels, height, width),
             dtype=torch.float32, device=device)
-
-        # arbitrary voxel start times and durations
-        voxel_start_times = self.prev_image_ts * (1 - first_times) + image_ts[:, 0] * first_times
-        voxel_durations = image_ts[:, -1] - voxel_start_times
 
         # prepare args
         args = [voxel_grid, target_timestamps]
@@ -450,8 +464,9 @@ class GPUEventSimulator(nn.Module):
             grid_dim = tuple(int(np.ceil(a / b)) for a, b in zip(sizes, block_dim))
             _cuda_kernel_dynamic_moving_average[grid_dim, block_dim](*cu_args, min_pixel_range, max_pixel_incr, eps)
         else:
-            args = [v.numpy() for v in args]
-            _cpu_kernel_dynamic_moving_average(*args, min_pixel_range, max_pixel_incr, eps)
+            cpu_tensors, np_args = self._cpu_kernel_args(args)
+            _cpu_kernel_dynamic_moving_average(*np_args, min_pixel_range, max_pixel_incr, eps)
+            self._copy_kernel_results(args, cpu_tensors, [0, 2, 3])
 
         self.filtering_prev_image_ts = timestamps[:, -1]
 

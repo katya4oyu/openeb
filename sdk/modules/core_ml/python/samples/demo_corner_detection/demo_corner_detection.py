@@ -20,6 +20,7 @@ import csv
 from metavision_core_ml.corner_detection.lightning_model import CornerDetectionLightningModel
 from metavision_core_ml.preprocessing.event_to_tensor_torch import event_cd_to_torch, event_volume
 from metavision_core_ml.utils.show_or_write import ShowWrite
+from metavision_core_ml.utils.torch_ops import infer_device
 from metavision_core_ml.corner_detection.corner_tracker import CornerTracker
 from metavision_core_ml.corner_detection.utils import clean_pred, update_nn_tracker, save_nn_corners
 from metavision_core.event_io import EventsIterator
@@ -38,6 +39,7 @@ def main(raw_args=None):
     parser.add_argument('--max-duration', type=int, default=-1, help='run for this duration')
     parser.add_argument('--thr-var', type=float, default=3e-5, help='threshold variance for adaptive rate')
     parser.add_argument('--cpu', action='store_true', help='if true use cpu and not cuda')
+    parser.add_argument('--device', type=str, default='', help='compute device, e.g. cuda, mps or cpu')
     parser.add_argument('--save-corners', action='store_true', help='also write the corners to a CSV file')
     parser.add_argument('--use-multi-time-steps', action='store_true', help='Do not re-aggregate predictions')
     parser.add_argument('--load-by-n-events', action='store_true', help='Load n events instead of delta_t')
@@ -60,8 +62,8 @@ def main(raw_args=None):
     height, width = events_iterator.get_size()
     print('original size: ', height, width)
 
-    device = 'cpu' if params.cpu else 'cuda'
-    model = CornerDetectionLightningModel.load_from_checkpoint(params.checkpoint)
+    device = infer_device(params.cpu, params.device or None)
+    model = CornerDetectionLightningModel.load_from_checkpoint(params.checkpoint, map_location=device)
     model.eval().to(device)
     nbins = model.hparams.event_volume_depth
     print('Nbins: ', nbins)
