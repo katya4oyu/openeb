@@ -17,7 +17,6 @@ import pytorch_lightning as pl
 import os
 import argparse
 import numpy as np
-import cv2
 
 from types import SimpleNamespace
 from torchvision.utils import make_grid
@@ -27,7 +26,6 @@ from itertools import islice
 from metavision_core_ml.core.temporal_modules import time_to_batch, seq_wise
 from metavision_core_ml.event_to_video.event_to_video import EventToVideo
 from metavision_core_ml.utils.torch_ops import normalize_tiles
-from metavision_core_ml.utils.show_or_write import ShowWrite
 from metavision_core_ml.utils.torch_ops import cuda_tick, viz_flow
 
 from metavision_core_ml.losses.perceptual_loss import VGGPerceptualLoss
@@ -71,8 +69,8 @@ class EventToVideoLightningModel(pl.LightningModule):
         self.vgg_perc_l1 = VGGPerceptualLoss()
 
     @classmethod
-    def load_from_checkpoint(cls, checkpoint_path):
-        checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+    def load_from_checkpoint(cls, checkpoint_path, map_location=None):
+        checkpoint = torch.load(checkpoint_path, map_location=map_location or torch.device('cpu'))
         hparams = argparse.Namespace(**checkpoint['hyper_parameters'])
         model = cls(hparams)
         model.load_state_dict(checkpoint['state_dict'])
@@ -154,6 +152,8 @@ class EventToVideoLightningModel(pl.LightningModule):
         window_name = None
         if show_video:
             window_name = "test_epoch {:d}".format(epoch)
+        from metavision_core_ml.utils.show_or_write import ShowWrite
+
         show_write = ShowWrite(window_name, video_name)
 
         with torch.no_grad():

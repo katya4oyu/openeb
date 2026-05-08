@@ -7,11 +7,7 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-add_subdirectory(demo_corner_detection)
-add_subdirectory(demo_event_to_video)
-add_subdirectory(metavision_flow_inference)
-add_subdirectory(train_corner_detection)
-add_subdirectory(train_event_to_video)
-add_subdirectory(viz_data_event_to_video)
-add_subdirectory(viz_video_to_event_gpu_simulator)
-add_subdirectory(viz_video_to_event_simulator)
+install(FILES metavision_dummy_radar.py
+        DESTINATION share/metavision/sdk/core/python_samples/metavision_dummy_radar
+        COMPONENT metavision-sdk-core-python-samples
+)
