@@ -66,7 +66,7 @@ void TzDeviceControl::start() {
     streaming_ = true;
     // Start only the main device, the others are always running
     for (auto dev : devices_)
-        if (auto main_dev = dynamic_cast<TzMainDevice *>(dev.get()))
+        if (dynamic_cast<TzMainDevice *>(dev.get()) != nullptr)
             dev.get()->start();
 }
 
@@ -76,7 +76,7 @@ void TzDeviceControl::stop() {
         return;
     // Stop only the main device, the others are always running
     for (auto dev = devices_.rbegin(); dev != devices_.rend(); dev++)
-        if (auto main_dev = dynamic_cast<TzMainDevice *>((*dev).get())) {
+        if (dynamic_cast<TzMainDevice *>((*dev).get()) != nullptr) {
             try {
                 (*dev).get()->stop();
             } catch (const HalConnectionException &e) {
