@@ -11,8 +11,8 @@
 Minimal OpenCV event viewer using OpenEB Python bindings.
 
 This sample avoids metavision_sdk_ui and OpenGL. It reads RAW/HDF5 event files
-with EventsIterator, renders slices into a NumPy BGR frame, and displays them
-with cv2.imshow.
+or the first available live camera with EventsIterator, renders slices into a
+NumPy BGR frame, and displays them with cv2.imshow.
 """
 
 import argparse
@@ -26,14 +26,19 @@ from metavision_core.event_io import EventsIterator
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Minimal OpenCV event viewer for RAW/HDF5 event files.",
+        description=(
+            "Minimal OpenCV event viewer for RAW/HDF5 event files or the first available live camera."
+        ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "-i",
         "--input-event-file",
-        required=True,
-        help="Path to an input event file supported by EventsIterator, such as RAW or HDF5.",
+        default="",
+        help=(
+            "Path to an input event file supported by EventsIterator, such as RAW or HDF5. "
+            "Omit to open the first available live camera."
+        ),
     )
     parser.add_argument(
         "--delta-t",
@@ -45,12 +50,12 @@ def parse_args():
         "--max-duration",
         type=int,
         default=None,
-        help="Maximum playback duration in microseconds. Omit to read until the file ends.",
+        help="Maximum stream duration in microseconds. Omit to read until the file ends or the viewer is closed.",
     )
     parser.add_argument(
         "--realtime",
         action="store_true",
-        help="Sleep between slices to approximate the event stream timing.",
+        help="Sleep between file slices to approximate event stream timing. Live camera input is already real time.",
     )
     args = parser.parse_args()
     if args.delta_t <= 0:
@@ -81,8 +86,10 @@ def render_events(events, frame):
 
 def main():
     args = parse_args()
+    input_path = args.input_event_file
+    live_camera = input_path == ""
     iterator = EventsIterator(
-        input_path=args.input_event_file,
+        input_path=input_path,
         mode="delta_t",
         delta_t=args.delta_t,
         max_duration=args.max_duration,
@@ -104,7 +111,7 @@ def main():
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):
             break
-        if args.realtime:
+        if args.realtime and not live_camera:
             time.sleep(sleep_s)
 
     cv2.destroyAllWindows()

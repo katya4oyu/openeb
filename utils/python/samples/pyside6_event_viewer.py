@@ -11,8 +11,8 @@
 Minimal PySide6 event viewer using OpenEB Python bindings.
 
 This sample intentionally avoids metavision_sdk_ui and OpenGL. Events are read
-with EventsIterator, rendered into a NumPy BGR frame, converted to QImage, and
-shown through Qt's regular raster widgets.
+from RAW/HDF5 files or a live camera with EventsIterator, rendered into a NumPy
+BGR frame, converted to QImage, and shown through Qt's regular raster widgets.
 """
 
 import argparse
@@ -29,14 +29,20 @@ from metavision_sdk_core import BaseFrameGenerationAlgorithm
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Minimal PySide6 event viewer for RAW/HDF5 event files.",
+        description=(
+            "Minimal PySide6 event viewer for RAW/HDF5 event files or the first "
+            "available live camera."
+        ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "-i",
         "--input-event-file",
-        required=True,
-        help="Path to an input event file supported by EventsIterator, such as RAW or HDF5.",
+        default="",
+        help=(
+            "Path to an input event file supported by EventsIterator, such as RAW or HDF5. "
+            "Omit to open the first available live camera."
+        ),
     )
     parser.add_argument(
         "--delta-t",
@@ -48,7 +54,7 @@ def parse_args():
         "--max-duration",
         type=int,
         default=None,
-        help="Maximum playback duration in microseconds. Omit to read until the file ends.",
+        help="Maximum stream duration in microseconds. Omit to read until the file ends or the viewer is closed.",
     )
     args = parser.parse_args()
     if args.delta_t <= 0:
@@ -82,8 +88,9 @@ class EventViewer(QMainWindow):
         super().__init__()
         self.setWindowTitle("OpenEB PySide6 Event Viewer")
 
+        input_path = args.input_event_file or ""
         self.iterator = EventsIterator(
-            input_path=args.input_event_file,
+            input_path=input_path,
             mode="delta_t",
             delta_t=args.delta_t,
             max_duration=args.max_duration,

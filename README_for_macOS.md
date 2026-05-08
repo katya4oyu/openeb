@@ -93,6 +93,12 @@ devbox run -- python utils/python/samples/pyside6_event_viewer.py \
   -i /path/to/recording.raw
 ```
 
+接続済みカメラをリアルタイム表示する場合は、`-i` を省略します。
+
+```sh
+devbox run -- python utils/python/samples/pyside6_event_viewer.py
+```
+
 HDF5 ファイルを開く場合:
 
 ```sh
@@ -121,6 +127,12 @@ devbox run -- python utils/python/samples/pyside6_event_viewer.py \
 ```sh
 devbox run -- python utils/python/samples/opencv_event_viewer.py \
   -i /path/to/recording.raw
+```
+
+接続済みカメラをリアルタイム表示する場合は、`-i` を省略します。
+
+```sh
+devbox run -- python utils/python/samples/opencv_event_viewer.py
 ```
 
 タイミング指定の例:
@@ -195,8 +207,9 @@ ls -lh /path/to/recording.raw
 
 ### カメラが見つからない
 
-この README で説明している自作 Viewer はファイル再生向けです。
-`-i /path/to/file.raw` または `-i /path/to/file.hdf5` を指定してください。
+この README で説明している自作 Viewer は、ファイル再生と live camera の両方に対応しています。
+ファイルを再生する場合は `-i /path/to/file.raw` または `-i /path/to/file.hdf5` を指定してください。
+接続済みカメラを開く場合は `-i` を省略してください。
 
 Live camera support は、USB 権限や実機ごとの検証が別途必要です。
 
