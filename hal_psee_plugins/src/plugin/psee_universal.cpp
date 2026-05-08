@@ -41,6 +41,10 @@ PluginDiscovery register_treuzell([](Plugin &plugin) {
     tz_cam_discovery->add_usb_id(0x04b4, 0x00f4, 0x19);
     tz_cam_discovery->add_usb_id(0x04b4, 0x00f5, 0x19);
     tz_cam_discovery->add_usb_id(0x1FC9, 0x5838, 0x19);
+    // CenturyArks SilkyEvCam Gen3.1 exposes the same Treuzell USB protocol with
+    // CenturyArks' vendor/product IDs on macOS.
+    tz_cam_discovery->add_usb_id(0x31f7, 0x0002, 0x19);
+    tz_cam_discovery->add_usb_id(0x31f7, 0x0002, 0x0);
 
     // Register live camera discoveries
     auto &fx3_disc = plugin.add_camera_discovery(std::make_unique<Fx3CameraDiscovery>());

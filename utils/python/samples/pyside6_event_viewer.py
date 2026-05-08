@@ -159,7 +159,16 @@ class EventViewer(QMainWindow):
 def main():
     args = parse_args()
     app = QApplication(sys.argv)
-    viewer = EventViewer(args)
+    try:
+        viewer = EventViewer(args)
+    except OSError as exc:
+        if args.input_event_file:
+            raise
+        print(f"Failed to open a live camera: {exc}", file=sys.stderr)
+        print("Run `devbox run camera-list` to check OpenEB HAL discovery.", file=sys.stderr)
+        print("Run `devbox run camera-trace` for verbose HAL discovery logs.", file=sys.stderr)
+        print("Run `devbox run usb-list` to check whether macOS exposes the USB device.", file=sys.stderr)
+        return 1
     viewer.show()
     return app.exec()
 

@@ -16,6 +16,7 @@ NumPy BGR frame, and displays them with cv2.imshow.
 """
 
 import argparse
+import sys
 import time
 
 import cv2
@@ -88,12 +89,21 @@ def main():
     args = parse_args()
     input_path = args.input_event_file
     live_camera = input_path == ""
-    iterator = EventsIterator(
-        input_path=input_path,
-        mode="delta_t",
-        delta_t=args.delta_t,
-        max_duration=args.max_duration,
-    )
+    try:
+        iterator = EventsIterator(
+            input_path=input_path,
+            mode="delta_t",
+            delta_t=args.delta_t,
+            max_duration=args.max_duration,
+        )
+    except OSError as exc:
+        if not live_camera:
+            raise
+        print(f"Failed to open a live camera: {exc}", file=sys.stderr)
+        print("Run `devbox run camera-list` to check OpenEB HAL discovery.", file=sys.stderr)
+        print("Run `devbox run camera-trace` for verbose HAL discovery logs.", file=sys.stderr)
+        print("Run `devbox run usb-list` to check whether macOS exposes the USB device.", file=sys.stderr)
+        return 1
 
     height, width = iterator.get_size()
     if width is None or height is None:
@@ -118,4 +128,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

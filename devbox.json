@@ -68,6 +68,9 @@
       "configure": "cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_SAMPLES=ON -DCOMPILE_PYTHON3_BINDINGS=ON -DGENERATE_DOC=OFF -DGENERATE_DOC_PYTHON_BINDINGS=OFF -DMETAVISION_SELECTED_MODULES='base;core;stream;ui' -DLFS_DOWNLOAD_COMPILATION_RESOURCES=OFF -DLFS_DOWNLOAD_VALIDATION_RESOURCES=OFF -DHDF5_ECF_PLUGIN_INSTALL_PATH=lib/hdf5/plugin -DPython3_EXECUTABLE=$(command -v python) -DPYTHON3_SITE_PACKAGES=$PWD/build/python-site-packages",
       "build": "cmake --build build",
       "import-check": "python -c 'import metavision_sdk_base, metavision_sdk_core, metavision_sdk_stream, metavision_sdk_ui, metavision_hal'",
+      "camera-list": "build/bin/metavision_hal_ls",
+      "camera-trace": "MV_LOG_LEVEL=TRACE build/bin/metavision_hal_ls",
+      "usb-list": "system_profiler SPUSBDataType | grep -A 25 -B 8 -E 'SilkyEvCam|CenturyArks|Vendor ID: 0x31f7|Product ID: 0x0002' || true",
       "clean": "cmake --build build --target clean"
     }
   }

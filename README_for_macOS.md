@@ -213,6 +213,31 @@ ls -lh /path/to/recording.raw
 
 Live camera support は、USB 権限や実機ごとの検証が別途必要です。
 
+このブランチでは、CenturyArks SilkyEvCam Gen3.1 (`USB Vendor ID: 0x31f7`, `USB Product ID: 0x0002`) を
+OpenEB の Treuzell discovery 対象に追加しています。
+
+まず OpenEB HAL から見えているか確認します。
+
+```sh
+devbox run camera-list
+```
+
+詳細ログを見る場合:
+
+```sh
+devbox run camera-trace
+```
+
+macOS の USB 情報として見えているか確認する場合:
+
+```sh
+devbox run usb-list
+```
+
+`usb-list` には出るが `camera-list` が `No device found` の場合、OpenEB HAL plugin までは読めているが、
+そのカメラの USB interface descriptor または Treuzell protocol 互換性で弾かれている可能性があります。
+この場合は `camera-trace` の出力を確認してください。
+
 ## 開発メモ
 
 Devbox 環境は以下で定義しています。
